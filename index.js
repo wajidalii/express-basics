@@ -10,10 +10,9 @@ app.use((req, res, next) => {
     try {
         console.log(`Date: ${new Date().toISOString()} 
         - ip: ${req.ip} method: ${req.method} url: '${req.url}'`);
-
-        throw new Error('Custom error for testing'); // triggers error handler
+        next();
     } catch (err) {
-        next(err);
+        throw new Error(`Error in middleware: ${err.message}`);
     }
 });
 
