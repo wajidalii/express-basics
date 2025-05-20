@@ -8,6 +8,7 @@ const errorHandler = require('./middlewares/errorHandler');
 const headerLogger = require('./middlewares/headerLogger');
 const notFound = require('./middlewares/notFound');
 const authorize = require('./middlewares/authorize');
+const rateLimiter = require('./middlewares/rateLimiter');
 const path = require('path');
 
 app.use(express.json());
@@ -23,6 +24,10 @@ app.get('/', (req, res) => {
 
 app.get('/admin', authorize('admin'), (req, res) => {
     res.send('Welcome to the admin panel!');
+});
+
+app.get('/limited', rateLimiter(5), (req, res) => {
+    res.send('You have accessed the rate-limited route!');
 });
 
 app.use('/users', userRoutes);
