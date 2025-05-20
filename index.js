@@ -3,28 +3,16 @@ const express = require('express');
 const app = express();
 const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/tasks');
+const logger = require('./middlewares/logger');
+const errorHandler = require('./middlewares/errorHandler');
+const headerLogger = require('./middlewares/headerLogger');
+const notFound = require('./middlewares/notFound');
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 
-// Custom middleware to log request details
-app.use((req, res, next) => {
-    try {
-        console.log(`Date: ${new Date().toISOString()} 
-        - ip: ${req.ip} method: ${req.method} url: '${req.url}'`);
-        next();
-    } catch (err) {
-        throw new Error(`Error in middleware: ${err.message}`);
-    }
-});
+app.use(logger);
+app.use(headerLogger);
 
-app.use((req, res, next) => {
-    // log request headers
-    console.log('Request Headers:', req.headers);
-    next();
-});
-
-// Basic route to handle GET requests
 app.get('/', (req, res) => {
     res.send('Express.js is running perfectly!');
 });
@@ -37,31 +25,10 @@ app.use('/users', userRoutes);
 
 app.use('/tasks', taskRoutes);
 
-app.get('/profile/:username', (req, res) => {
-    const { username } = req.params;
-    const { age } = req.query;
-    res.send({
-        "username": username,
-        "age": age
-    });
-});
+app.use(notFound);
 
-app.get('/error', (req, res, next) => {
-    next(new Error('Manually triggered error'));
-});
+app.use(errorHandler);
 
-// 404 error handling middleware
-app.use((req, res, next) => {
-    res.status(404).send('Sorry, that route does not exist.');
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
-
-// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
