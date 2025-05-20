@@ -31,6 +31,11 @@ app.use('/users', userRoutes);
 
 app.use('/tasks', taskRoutes);
 
+// 404 error handling middleware
+app.use((req, res, next) => {
+    res.status(404).send('Sorry, that route does not exist.');
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
