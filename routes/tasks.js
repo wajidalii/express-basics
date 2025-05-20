@@ -3,9 +3,9 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/task', (req, res) => res.send('Get task'));
-router.post('/task', (req, res) => res.send('Create task'));
-router.put('/task/:id', (req, res) => res.send(`Update task ${req.params.id}`));
-router.delete('/task/:id', (req, res) => res.send(`Delete task ${req.params.id}`));
+router.get('/', (req, res) => res.send('Get task'));
+router.post('/', (req, res) => res.send('Create task'));
+router.put('/:id', (req, res) => res.send(`Update task ${req.params.id}`));
+router.delete('/:id', (req, res) => res.send(`Delete task ${req.params.id}`));
 
 module.exports = router;
