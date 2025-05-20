@@ -18,6 +18,12 @@ app.use((req, res, next) => {
     }
 });
 
+app.use((req, res, next) => {
+    // log request headers
+    console.log('Request Headers:', req.headers);
+    next();
+});
+
 // Basic route to handle GET requests
 app.get('/', (req, res) => {
     res.send('Express.js is running perfectly!');
@@ -30,6 +36,19 @@ app.get('/about', (req, res) => {
 app.use('/users', userRoutes);
 
 app.use('/tasks', taskRoutes);
+
+app.get('/profile/:username', (req, res) => {
+    const { username } = req.params;
+    const { age } = req.query;
+    res.send({
+        "username": username,
+        "age": age
+    });
+});
+
+app.get('/error', (req, res, next) => {
+    next(new Error('Manually triggered error'));
+});
 
 // 404 error handling middleware
 app.use((req, res, next) => {
