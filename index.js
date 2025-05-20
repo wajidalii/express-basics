@@ -1,4 +1,5 @@
 require('dotenv').config();
+const config = require('./config');
 const express = require('express');
 const app = express();
 const userRoutes = require('./routes/users');
@@ -35,7 +36,7 @@ app.use(notFound);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running in ${config.env} mode on port ${PORT}`);
 });
