@@ -7,6 +7,7 @@ const logger = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 const headerLogger = require('./middlewares/headerLogger');
 const notFound = require('./middlewares/notFound');
+const authorize = require('./middlewares/authorize');
 const path = require('path');
 
 app.use(express.json());
@@ -18,6 +19,10 @@ app.use(headerLogger);
 
 app.get('/', (req, res) => {
     res.send('Express.js is running perfectly!');
+});
+
+app.get('/admin', authorize('admin'), (req, res) => {
+    res.send('Welcome to the admin panel!');
 });
 
 app.use('/users', userRoutes);
