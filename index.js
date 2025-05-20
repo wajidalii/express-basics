@@ -15,6 +15,7 @@ app.use(express.json());
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
+app.use(rateLimiter);
 app.use(logger);
 app.use(headerLogger);
 
@@ -24,10 +25,6 @@ app.get('/', (req, res) => {
 
 app.get('/admin', authorize('admin'), (req, res) => {
     res.send('Welcome to the admin panel!');
-});
-
-app.get('/limited', rateLimiter(5), (req, res) => {
-    res.send('You have accessed the rate-limited route!');
 });
 
 app.use('/users', userRoutes);
