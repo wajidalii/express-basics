@@ -1,18 +1,13 @@
 // Rate limiting middleware
 // This middleware limits the number of requests from a single IP
-const rateLimiter = (limit) => {
-    const requestCounts = new Map(); // key: IP or user, value: count
+const rateLimit = require('express-rate-limit');
 
-    return (req, res, next) => {
-        const ip = req.ip;
-        requestCounts.set(ip, (requestCounts.get(ip) || 0) + 1);
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 15, // Limit each IP to 15 requests per windowMs
+    message: 'Too many requests, please try again after 15 minutes',
+    standardHeaders: true, // Return rate limit info in headers
+    legacyHeaders: false,  // Disable the `X-RateLimit-*` headers
+});
 
-        if (requestCounts.get(ip) > limit) {
-            return res.status(429).send('Too many requests from your IP');
-        }
-
-        next();
-    };
-};
-
-module.exports = rateLimiter;
+module.exports = limiter;
