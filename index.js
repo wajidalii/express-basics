@@ -17,10 +17,6 @@ app.get('/', (req, res) => {
     res.send('Express.js is running perfectly!');
 });
 
-app.get('/about', (req, res) => {
-    res.send('About Page');
-});
-
 app.use('/users', userRoutes);
 
 app.use('/tasks', taskRoutes);
