@@ -12,6 +12,7 @@ const notFound = require('./middlewares/notFound');
 const authorize = require('./middlewares/authorize');
 const rateLimiter = require('./middlewares/rateLimiter');
 const path = require('path');
+const { protect } = require('./middlewares/authMiddleware');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -32,7 +33,7 @@ app.get('/admin', authorize('admin'), (req, res) => {
     res.send('Welcome to the admin panel!');
 });
 
-app.use('/users', userRoutes);
+app.use('/users', protect, userRoutes);
 
 app.use('/tasks', taskRoutes);
 
