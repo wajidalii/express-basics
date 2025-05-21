@@ -4,7 +4,7 @@ const userFieldsRules = [
     body('name')
         .notEmpty().withMessage('Name is required')
         .isString().withMessage('Name must be a string')
-        .trim(),
+        .trim().escape(),
 
     body('email')
         .notEmpty().withMessage('Email is required')
