@@ -3,7 +3,8 @@
 const logger = (req, res, next) => {
     try {
         console.log(`Date: ${new Date().toISOString()} 
-        - ip: ${req.ip} method: ${req.method} url: '${req.url}'`);
+        - ip: ${req.ip} method: ${req.method} url: '${req.url}'
+        - body: ${JSON.stringify(req.body)}`);
         next();
     } catch (err) {
         throw new Error(`Error in middleware: ${err.message}`);
