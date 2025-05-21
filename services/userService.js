@@ -18,10 +18,11 @@ exports.createUser = async (user) => {
 
 exports.updateUser = async (id, user) => {
     const { name, email } = user;
-    await db.query('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+    const [result] = await db.query('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+    return result.affectedRows;
 }
 
 exports.deleteUser = async (id) => {
-    await db.query('DELETE FROM users WHERE id = ?', [id]);
-    return { id };
+    const [result] = await db.query('DELETE FROM users WHERE id = ?', [id]);
+    return result.affectedRows;
 }

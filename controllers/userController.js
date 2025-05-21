@@ -29,8 +29,9 @@ exports.createUser = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
     try {
-        const user = await userService.updateUser(req.params.id, req.body);
-        res.json(user);
+        const affected = await userService.updateUser(req.params.id, req.body);
+        if (!affected) return res.status(404).send('User not found');
+        res.send('User updated');
     } catch (err) {
         next(err);
     }
@@ -38,8 +39,9 @@ exports.updateUser = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
     try {
-        await userService.deleteUser(req.params.id);
-        res.status(204).send();
+        const affected = await userService.deleteUser(req.params.id);
+        if (!affected) return res.status(404).send('User not found');
+        res.send('User deleted');
     } catch (err) {
         next(err);
     }
