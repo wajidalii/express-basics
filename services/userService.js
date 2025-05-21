@@ -11,7 +11,6 @@ exports.getUserById = async (id) => {
 }
 
 exports.createUser = async (user) => {
-    console.log('userService, createUser', user);
     const { name, email } = user;
     const [result] = await db.query('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
     return { id: result.insertId, ...user };
