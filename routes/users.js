@@ -5,25 +5,16 @@ const { body, param } = require('express-validator');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const validate = require('../middlewares/validation');
+const { createUserRules, updateUserRules, userIdParamRules } = require('../validations/userValidation');
 
 router.get('/', userController.getAllUsers);
 
-router.get('/:id', param('id').isInt().withMessage('ID must be an integer'),
-    userController.getUserById);
+router.get('/:id', userIdParamRules, validate, userController.getUserById);
 
-router.post('/', body('name').isString().withMessage('Name must be a string'),
-    body('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Email must be a valid email address'),
-    validate,
-    userController.createUser);
+router.post('/', createUserRules, validate, userController.createUser);
 
-router.put('/:id', param('id').isInt().withMessage('ID must be an integer'),
-    body('name').notEmpty().withMessage('Name is required').isString().withMessage('Name must be a string'),
-    body('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Email must be a valid email address'),
-    validate,
-    userController.updateUser);
+router.put('/:id', updateUserRules, validate, userController.updateUser);
 
-router.delete('/:id', param('id').isInt().withMessage('ID must be an integer'),
-    validate,
-    userController.deleteUser);
+router.delete('/:id', userIdParamRules, validate, userController.deleteUser);
 
 module.exports = router;
