@@ -1,14 +1,25 @@
 // User routes module
 // This module handles user-related routes
 const express = require('express');
+const { body, param } = require('express-validator');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
-// Define routes for user-related operations
-router.get('/', userController.getAllUsers); // Get all users
-router.get('/:id', userController.getUserById); // Get user by ID
-router.post('/', userController.createUser); // Create a new user
-router.put('/:id', userController.updateUser); // Update user by ID
-router.delete('/:id', userController.deleteUser); // Delete user by ID
+router.get('/', userController.getAllUsers);
+
+router.get('/:id', param('id').isInt().withMessage('ID must be an integer'),
+    userController.getUserById);
+
+router.post('/', body('name').isString().withMessage('Name must be a string'),
+    body('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Email must be a valid email address'),
+    userController.createUser);
+
+router.put('/:id', param('id').isInt().withMessage('ID must be an integer'),
+    body('name').notEmpty().withMessage('Name is required').isString().withMessage('Name must be a string'),
+    body('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Email must be a valid email address'),
+    userController.updateUser);
+
+router.delete('/:id', param('id').isInt().withMessage('ID must be an integer'),
+    userController.deleteUser);
 
 module.exports = router;
