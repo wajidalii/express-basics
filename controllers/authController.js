@@ -52,3 +52,27 @@ exports.login = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.refreshToken = async (req, res, next) => {
+    try {
+        const token = req.cookies.refreshToken;
+        if (!token) return res.status(401).send('Refresh token missing');
+
+        const user = await userService.getUserByRefreshToken(token);
+        if (!user) return res.status(403).send('Invalid or expired refresh token');
+
+        // Issue new tokens
+        const accessToken = signAccessToken(user);
+        const { token: newRefreshToken, expires } = signRefreshToken(user);
+
+        // Update stored refresh token
+        await userService.saveRefreshToken(user.id, newRefreshToken, expires);
+
+        // Overwrite cookie
+        res.cookie('refreshToken', newRefreshToken, COOKIE_OPTIONS);
+
+        res.json({ accessToken });
+    } catch (err) {
+        return res.status(401).send('Invalid refresh token');
+    }
+};
