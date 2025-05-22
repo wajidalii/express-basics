@@ -17,19 +17,19 @@ const cookieParser = require('cookie-parser');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cookieParser());
-app.use('/auth', authRoutes);
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use('/static', express.static(path.join(__dirname, 'static')));
-
 app.use(rateLimiter);
 app.use(logger);
 app.use(headerLogger);
 
+app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/static', express.static(path.join(__dirname, 'static')));
+
 app.get('/', (req, res) => {
     res.send('Express.js is running perfectly!');
 });
+
+app.use('/auth', authRoutes);
 
 app.get('/admin', authorize('admin'), (req, res) => {
     res.send('Welcome to the admin panel!');
