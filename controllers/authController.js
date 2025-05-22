@@ -76,3 +76,19 @@ exports.refreshToken = async (req, res, next) => {
         return res.status(401).send('Invalid refresh token');
     }
 };
+
+exports.logout = async (req, res, next) => {
+    try {
+        const token = req.cookies.refreshToken;
+        if (token) {
+            // Clear from DB
+            const user = await userService.getUserByRefreshToken(token);
+            if (user) await userService.clearRefreshToken(user.id);
+        }
+        // Clear cookie
+        res.clearCookie('refreshToken', COOKIE_OPTIONS);
+        res.send('Logged out');
+    } catch (err) {
+        next(err);
+    }
+};
