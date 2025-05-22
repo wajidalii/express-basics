@@ -14,6 +14,7 @@ const rateLimiter = require('./middlewares/rateLimiter');
 const path = require('path');
 const { protect } = require('./middlewares/authMiddleware');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,6 +22,7 @@ app.use(cookieParser());
 app.use(rateLimiter);
 app.use(logger);
 app.use(headerLogger);
+app.use(helmet());
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/static', express.static(path.join(__dirname, 'static')));
