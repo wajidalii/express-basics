@@ -1,15 +1,7 @@
-const jwt = require('jsonwebtoken');
+const userService = require('../services/userService');
 const bcrypt = require('bcryptjs');
-
-const users = [];
-
-const generateAccessToken = (user) => {
-    return jwt.sign(
-        { id: user.id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
-    );
-};
+const { signAccessToken, signRefreshToken } = require('../utils/auth');
+const { COOKIE_OPTIONS } = require('../config/auth');
 
 exports.register = async (req, res, next) => {
     try {
@@ -40,16 +32,23 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-
-        const user = users.find(u => u.email === email);
+        const user = await userService.findUserByEmail(email);
         if (!user) return res.status(401).send('Invalid credentials');
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) return res.status(401).send('Invalid credentials');
 
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) return res.status(401).send('Invalid credentials');
+        // Sign tokens
+        const accessToken = signAccessToken(user);
+        const { token: refreshToken, expires } = signRefreshToken(user);
 
-        const token = generateAccessToken(user);
-        res.json({ user: { id: user.id, name: user.name, email }, token });
-    } catch (error) {
-        next(error);
+        // Store refresh token in DB
+        await userService.saveRefreshToken(user.id, refreshToken, expires);
+
+        // Send refresh token as httpOnly cookie
+        res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+
+        res.json({ accessToken });
+    } catch (err) {
+        next(err);
     }
-}
+};
