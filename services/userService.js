@@ -59,3 +59,11 @@ exports.saveRefreshToken = async (userId, token, expires) => {
     );
 };
 
+exports.getUserByRefreshToken = async (token) => {
+    const [rows] = await db.query(
+        `SELECT * FROM users WHERE refreshToken = ? AND refreshTokenExpires > NOW()`,
+        [token]
+    );
+    return rows[0];
+};
+
