@@ -67,3 +67,9 @@ exports.getUserByRefreshToken = async (token) => {
     return rows[0];
 };
 
+exports.clearRefreshToken = async (userId) => {
+    await db.query(
+        `UPDATE users SET refreshToken = NULL, refreshTokenExpires = NULL WHERE id = ?`,
+        [userId]
+    );
+};
