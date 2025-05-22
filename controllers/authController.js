@@ -20,14 +20,11 @@ exports.register = async (req, res, next) => {
         const newUser = { id: users.length + 1, name, email, password: hashedPassword };
         users.push(newUser);
 
-        // Generate token
-        const token = generateAccessToken(newUser);
-
-        res.status(201).json({ token });
+        res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (error) {
         next(error);
     }
-}
+};
 
 exports.login = async (req, res, next) => {
     try {
