@@ -51,3 +51,11 @@ exports.verifyUser = async (token) => {
     );
     return rows[0];
 };
+
+exports.saveRefreshToken = async (userId, token, expires) => {
+    await db.query(
+        `UPDATE users SET refreshToken = ?, refreshTokenExpires = ? WHERE id = ?`,
+        [token, expires, userId]
+    );
+};
+
