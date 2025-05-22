@@ -37,7 +37,7 @@ exports.login = async (req, res, next) => {
         // Send refresh token as httpOnly cookie
         res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
 
-        res.json({ accessToken });
+        res.status(200).json({ message: 'Login successful', accessToken: accessToken });
     } catch (err) {
         next(err);
     }
@@ -61,7 +61,7 @@ exports.refreshToken = async (req, res, next) => {
         // Overwrite cookie
         res.cookie('refreshToken', newRefreshToken, COOKIE_OPTIONS);
 
-        res.json({ accessToken });
+        res.status(200).json({ message: 'Tokens refreshed successfully', accessToken });
     } catch (err) {
         return res.status(401).send('Invalid refresh token');
     }
@@ -77,7 +77,7 @@ exports.logout = async (req, res, next) => {
         }
         // Clear cookie
         res.clearCookie('refreshToken', COOKIE_OPTIONS);
-        res.send('Logged out');
+        res.status(200).json({ message: 'Logged out successfully' });
     } catch (err) {
         next(err);
     }
