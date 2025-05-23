@@ -10,6 +10,11 @@ const userFieldsRules = [
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Email must be valid')
         .normalizeEmail(),
+
+    body('role')
+        .notEmpty().withMessage('Role is required')
+        .isString().withMessage('Role must be a string')
+        .trim().escape(),
 ];
 
 const userRegistrationRules = [
