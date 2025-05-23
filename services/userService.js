@@ -15,21 +15,21 @@ exports.findUserByEmail = async (email) => {
     return rows[0];
 };
 
-exports.createUser = async ({ name, email, password }) => {
+exports.createUser = async ({ name, email, password, role }) => {
     const token = crypto.randomBytes(20).toString('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
     const [result] = await db.query(
         `INSERT INTO users 
-         (name,email,password,verificationToken,verificationExpires)
+         (name,email,password,role,verificationToken,verificationExpires)
        VALUES (?,?,?,?,?)`,
-        [name, email, password, token, expires]
+        [name, email, password, role, token, expires]
     );
-    return { id: result.insertId, name, email, verificationToken: token };
+    return { id: result.insertId, name, email, role, verificationToken: token };
 };
 
 exports.updateUser = async (id, user) => {
-    const { name, email } = user;
-    const [result] = await db.query('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+    const { name, email, role } = user;
+    const [result] = await db.query('UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?', [name, email, role, id]);
     return result.affectedRows;
 };
 
