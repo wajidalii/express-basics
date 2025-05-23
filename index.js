@@ -5,6 +5,7 @@ const app = express();
 const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 const logger = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 const headerLogger = require('./middlewares/headerLogger');
@@ -33,9 +34,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 
-app.get('/admin', authorize('admin'), (req, res) => {
-    res.send('Welcome to the admin panel!');
-});
+app.use('/admin', adminRoutes);
 
 app.use('/users', protect, userRoutes);
 
