@@ -55,12 +55,21 @@ class UserRepository {
         return rows[0];
     }
 
-    async create(user) {
+    async findByEmail(email) {
+        const [rows] = await db.query(`SELECT * FROM users WHERE email = ?`, [email]);
+        return rows[0];
+    }
+
+    async create({ name, email, password, role }) {
+        const token = crypto.randomBytes(20).toString('hex');
+        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
         const [result] = await db.query(
-            `INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)`,
-            [user.name, user.email, user.password, user.role]
+            `INSERT INTO users 
+             (name,email,password,role,verificationToken,verificationExpires)
+           VALUES (?,?,?,?,?)`,
+            [name, email, password, role, token, expires]
         );
-        return { id: result.insertId, ...user };
+        return { id: result.insertId, name, email, role, verificationToken: token };
     }
 
     async update(id, user) {
