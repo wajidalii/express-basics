@@ -7,6 +7,7 @@ const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const accountRoutes = require('./routes/accounts');
+const orderRoutes = require('./routes/orders');
 const logger = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 const headerLogger = require('./middlewares/headerLogger');
@@ -37,7 +38,9 @@ app.use('/auth', authRoutes);
 
 app.use('/admin', adminRoutes);
 
-app.use('/users', protect, userRoutes);
+app.use('/users', userRoutes);
+
+app.use('/orders', orderRoutes);
 
 app.use('/tasks', taskRoutes);
 
