@@ -6,6 +6,7 @@ const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const accountRoutes = require('./routes/accounts');
 const logger = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 const headerLogger = require('./middlewares/headerLogger');
@@ -40,6 +41,7 @@ app.use('/users', protect, userRoutes);
 
 app.use('/tasks', taskRoutes);
 
+app.use('/accounts', protect, accountRoutes);
 app.use(notFound);
 
 app.use(errorHandler);
