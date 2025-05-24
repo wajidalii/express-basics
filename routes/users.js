@@ -7,8 +7,9 @@ const userController = require('../controllers/userController');
 const validate = require('../middlewares/validation');
 const { createUserRules, updateUserRules, userIdParamRules } = require('../validations/userValidation');
 const upload = require('../middlewares/upload');
+const { getUsersQueryRules } = require('../validations/userQueryValidation');
 
-router.get('/', userController.getAllUsers);
+router.get('/', getUsersQueryRules, validate, userController.getAllUsers);
 
 router.get('/:id', userIdParamRules, validate, userController.getUserById);
 
