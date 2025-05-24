@@ -2,8 +2,19 @@ const userService = require('../services/userService');
 
 exports.getAllUsers = async (req, res, next) => {
     try {
-        const users = await userService.getAllUsers();
-        res.json(users);
+        const { page = 1, limit = 10, sort = 'id', order = 'asc', name, email } = req.query;
+        const options = {
+            page,
+            limit,
+            sort,
+            order,
+            filter: {
+                name,
+                email
+            }
+        }
+        const users = await userService.getAllUsers(options);
+        res.status(200).json(users);
     } catch (err) {
         next(err);
     }
@@ -12,7 +23,7 @@ exports.getAllUsers = async (req, res, next) => {
 exports.getUserById = async (req, res, next) => {
     try {
         const user = await userService.getUserById(req.params.id);
-        res.json(user);
+        res.status(200).json(user);
     } catch (err) {
         next(err);
     }
@@ -31,7 +42,7 @@ exports.updateUser = async (req, res, next) => {
     try {
         const affected = await userService.updateUser(req.params.id, req.body);
         if (!affected) return res.status(404).send('User not found');
-        res.send('User updated');
+        res.status(200).send('User updated');
     } catch (err) {
         next(err);
     }
@@ -41,7 +52,7 @@ exports.deleteUser = async (req, res, next) => {
     try {
         const affected = await userService.deleteUser(req.params.id);
         if (!affected) return res.status(404).send('User not found');
-        res.send('User deleted');
+        res.status(200).send('User deleted');
     } catch (err) {
         next(err);
     }
