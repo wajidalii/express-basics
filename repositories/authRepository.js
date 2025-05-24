@@ -1,3 +1,5 @@
+const db = require('../config/db');
+
 class AuthRepository {
     async getUserByRefreshToken(token) {
         const [rows] = await db.query(
