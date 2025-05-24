@@ -52,7 +52,7 @@ exports.getOrdersByUserId = async (userId) => {
 exports.createOrder = async (orderData) => {
     const connection = await db.getConnection();
     try {
-        connection.beginTransaction();
+        await connection.beginTransaction();
         const orderId = await orderRepo.createOrder(connection, orderData.userId);
         for (const item of orderData.items) {
             await orderRepo.createOrderItem(connection, orderId, item.productId, item.quantity);
@@ -70,7 +70,7 @@ exports.createOrder = async (orderData) => {
 exports.updateOrder = async (orderId, orderData) => {
     const connection = await db.getConnection();
     try {
-        connection.beginTransaction();
+        await connection.beginTransaction();
         const affectedRows = await orderRepo.updateOrder(connection, orderId, orderData.userId);
         if (affectedRows === 0) {
             throw new Error('Order not found or no changes made');
@@ -100,7 +100,7 @@ exports.deleteOrder = async (orderId) => {
             return 0;
         }
 
-        connection.beginTransaction();
+        await connection.beginTransaction();
         const affectedRows = await orderRepo.deleteOrder(connection, orderId);
 
         if (affectedRows === 0) {
