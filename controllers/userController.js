@@ -46,3 +46,13 @@ exports.deleteUser = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.uploadFile = async (req, res, next) => {
+    try {
+        const file = req.file;
+        if (!file) return res.status(400).send('No file uploaded');
+        res.status(201).json({ filePath: file.path, message: 'File uploaded successfully' });
+    } catch (err) {
+        next(err);
+    }
+};
