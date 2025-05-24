@@ -41,6 +41,8 @@ exports.getAllUsers = async (options) => {
 
 exports.getUserById = (id) => userRepository.findById(id);
 
+exports.getUserByEmail = (email) => userRepository.findByEmail(email);
+
 exports.createUser = (data) => {
     const { name, email, password, role } = data;
     const token = crypto.randomBytes(32).toString('hex');
