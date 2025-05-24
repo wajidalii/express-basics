@@ -1,7 +1,6 @@
 // User routes module
 // This module handles user-related routes
 const express = require('express');
-const { body, param } = require('express-validator');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const validate = require('../middlewares/validation');
