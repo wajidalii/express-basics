@@ -1,8 +1,9 @@
-const { parse } = require('path');
+const bcrypt = require('bcryptjs');
 const db = require('../config/db');
 const crypto = require('crypto');
 const UserRepository = require('../repositories/userRepository');
 const TokenRepository = require('../repositories/tokenRepository');
+const { signAccessToken, signRefreshToken } = require('../utils/auth');
 
 exports.getAllUsers = async (options) => {
     const { sort, order, filter } = options;
@@ -71,3 +72,51 @@ exports.saveRefreshToken = (userId, token, expires) =>
 exports.getUserByRefreshToken = (token) => TokenRepository.getUserByRefreshToken(token);
 
 exports.clearRefreshToken = (userId) => TokenRepository.clearRefreshToken(userId);
+
+exports.registerUser = async ({ name, email, password }) => {
+    const existing = await UserRepository.findByEmail(email);
+    if (existing) throw new Error('User already exists');
+
+    const hashed = await bcrypt.hash(password, 10);
+    const newUser = await UserRepository.create({ name, email, password: hashed });
+    return newUser;
+};
+
+exports.loginUser = async ({ email, password }) => {
+    const user = await UserRepository.findByEmail(email);
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+        throw new Error('Invalid credentials');
+    }
+
+    const accessToken = signAccessToken(user);
+    const { token: refreshToken, expires } = signRefreshToken(user);
+    await TokenRepository.saveRefreshToken(user.id, refreshToken, expires);
+
+    return { accessToken, refreshToken, refreshTokenExpires: expires, user };
+};
+
+exports.logoutUser = async (token) => {
+    try {
+        const user = await TokenRepository.getUserByRefreshToken(token);
+        if (user) {
+            const result = await TokenRepository.clearRefreshToken(user.id);
+            return result;
+        }
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.refreshUserToken = async (oldToken) => {
+    if (!oldToken) throw new Error('Refresh token missing');
+
+    const user = await TokenRepository.getUserByRefreshToken(oldToken);
+    if (!user) throw new Error('Invalid or expired refresh token');
+
+    const accessToken = signAccessToken(user);
+    const { token: newRefreshToken, expires } = signRefreshToken(user);
+
+    await TokenRepository.saveRefreshToken(user.id, newRefreshToken, expires);
+
+    return { accessToken, refreshToken: newRefreshToken };
+};
