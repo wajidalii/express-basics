@@ -1,5 +1,3 @@
-const bcrypt = require('bcryptjs');
-const db = require('../config/db');
 const crypto = require('crypto');
 const userRepository = require('../repositories/userRepository');
 
