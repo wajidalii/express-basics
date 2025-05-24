@@ -6,6 +6,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const validate = require('../middlewares/validation');
 const { createUserRules, updateUserRules, userIdParamRules } = require('../validations/userValidation');
+const upload = require('../middlewares/upload');
 
 router.get('/', userController.getAllUsers);
 
@@ -16,5 +17,7 @@ router.post('/', createUserRules, validate, userController.createUser);
 router.put('/:id', updateUserRules, validate, userController.updateUser);
 
 router.delete('/:id', userIdParamRules, validate, userController.deleteUser);
+
+router.post('/file', upload.single('file'), userController.uploadFile);
 
 module.exports = router;
