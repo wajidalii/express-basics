@@ -29,10 +29,11 @@ class TokenRepository {
     }
 
     async clearRefreshToken(userId) {
-        await db.query(
+        const result = await db.query(
             `UPDATE users SET refreshToken = NULL, refreshTokenExpires = NULL WHERE id = ?`,
             [userId]
         );
+        return result.affectedRows;
     }
 }
 
