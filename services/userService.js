@@ -1,8 +1,53 @@
+const { parse } = require('path');
 const db = require('../config/db');
 const crypto = require('crypto');
-exports.getAllUsers = async () => {
-    const [rows] = await db.query('SELECT * FROM users');
-    return rows;
+exports.getAllUsers = async (options) => {
+    const { sort, order, filter } = options;
+    const page = parseInt(options.page) || 1;
+    const limit = parseInt(options.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    let where = 'WHERE 1';
+    const params = [];
+    if (filter.name) {
+        where += ` AND name LIKE ?`;
+        params.push(`%${filter.name}%`);
+    }
+    if (filter.email) {
+        where += ` AND email LIKE ?`;
+        params.push(`%${filter.email}%`);
+    }
+
+    const [[{ total }]] = await db.query(
+        `SELECT COUNT(*) as total FROM users ${where}`,
+        params
+    );
+
+    if (total === 0)
+        return { total: 0, users: [] };
+
+    if (page > Math.ceil(total / limit))
+        throw new Error('Page number exceeds total pages');
+
+    const query = `
+        SELECT name, email, role FROM users ${where}
+        ORDER BY ${sort} ${order.toUpperCase()}
+        LIMIT ? OFFSET ?
+    `;
+    const [rows] = await db.query(
+        query,
+        [...params, limit, offset]
+    );
+
+    return {
+        data: rows,
+        meta: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
 };
 
 exports.getUserById = async (id) => {
