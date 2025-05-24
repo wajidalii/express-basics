@@ -1,53 +1,21 @@
 const db = require('../config/db');
 
 class UserRepository {
-    async findAll(options) {
-        const { sort, order, filter } = options;
-        const page = parseInt(options.page) || 1;
-        const limit = parseInt(options.limit) || 10;
-        const offset = (page - 1) * limit;
-
-        let where = 'WHERE 1';
-        const params = [];
-        if (filter.name) {
-            where += ` AND name LIKE ?`;
-            params.push(`%${filter.name}%`);
-        }
-        if (filter.email) {
-            where += ` AND email LIKE ?`;
-            params.push(`%${filter.email}%`);
-        }
-
+    async count(where, params) {
         const [[{ total }]] = await db.query(
-            `SELECT COUNT(*) as total FROM users ${where}`,
-            params
+            `SELECT COUNT(*) as total FROM users ${where}`, params
         );
+        return total;
+    }
 
-        if (total === 0)
-            return { total: 0, users: [] };
-
-        if (page > Math.ceil(total / limit))
-            throw new Error('Page number exceeds total pages');
-
-        const query = `
-            SELECT name, email, role FROM users ${where}
-            ORDER BY ${sort} ${order.toUpperCase()}
-            LIMIT ? OFFSET ?
-        `;
+    async findPaginated(where, params, sort, order, limit, offset) {
         const [rows] = await db.query(
-            query,
+            `SELECT name, email, role FROM users ${where}
+           ORDER BY ${sort} ${order.toUpperCase()}
+           LIMIT ? OFFSET ?`,
             [...params, limit, offset]
         );
-
-        return {
-            data: rows,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit)
-            }
-        };
+        return rows;
     }
 
     async findById(id) {
@@ -60,16 +28,15 @@ class UserRepository {
         return rows[0];
     }
 
-    async create({ name, email, password, role }) {
-        const token = crypto.randomBytes(20).toString('hex');
-        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    async create({ name, email, password, role, verificationToken, verificationExpires }) {
+
         const [result] = await db.query(
             `INSERT INTO users 
              (name,email,password,role,verificationToken,verificationExpires)
            VALUES (?,?,?,?,?)`,
-            [name, email, password, role, token, expires]
+            [name, email, password, role, verificationToken, verificationExpires]
         );
-        return { id: result.insertId, name, email, role, verificationToken: token };
+        return { id: result.insertId, name, email, role, verificationToken };
     }
 
     async update(id, user) {

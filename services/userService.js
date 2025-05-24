@@ -1,6 +1,9 @@
 const { parse } = require('path');
 const db = require('../config/db');
 const crypto = require('crypto');
+const UserRepository = require('../repositories/userRepository');
+const TokenRepository = require('../repositories/tokenRepository');
+
 exports.getAllUsers = async (options) => {
     const { sort, order, filter } = options;
     const page = parseInt(options.page) || 1;
@@ -9,112 +12,49 @@ exports.getAllUsers = async (options) => {
 
     let where = 'WHERE 1';
     const params = [];
-    if (filter.name) {
+
+    if (filter?.name) {
         where += ` AND name LIKE ?`;
         params.push(`%${filter.name}%`);
     }
-    if (filter.email) {
+    if (filter?.email) {
         where += ` AND email LIKE ?`;
         params.push(`%${filter.email}%`);
     }
 
-    const [[{ total }]] = await db.query(
-        `SELECT COUNT(*) as total FROM users ${where}`,
-        params
-    );
+    const total = await UserRepository.count(where, params);
+    if (total === 0) {
+        return { data: [], meta: { total, page, limit, totalPages: 0 } };
+    }
 
-    if (total === 0)
-        return { total: 0, users: [] };
-
-    if (page > Math.ceil(total / limit))
+    const totalPages = Math.ceil(total / limit);
+    if (page > totalPages) {
         throw new Error('Page number exceeds total pages');
+    }
 
-    const query = `
-        SELECT name, email, role FROM users ${where}
-        ORDER BY ${sort} ${order.toUpperCase()}
-        LIMIT ? OFFSET ?
-    `;
-    const [rows] = await db.query(
-        query,
-        [...params, limit, offset]
+    const rows = await UserRepository.findPaginated(
+        where, params, sort, order, limit, offset
     );
 
     return {
         data: rows,
-        meta: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit)
-        }
+        meta: { total, page, limit, totalPages }
     };
 };
 
-exports.getUserById = async (id) => {
-    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
-    return rows[0];
-};
+exports.getUserById = (id) => UserRepository.findById(id);
 
-exports.findUserByEmail = async (email) => {
-    const [rows] = await db.query(`SELECT * FROM users WHERE email = ?`, [email]);
-    return rows[0];
-};
+exports.createUser = (data) => UserRepository.create(data);
 
-exports.createUser = async ({ name, email, password, role }) => {
-    const token = crypto.randomBytes(20).toString('hex');
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-    const [result] = await db.query(
-        `INSERT INTO users 
-         (name,email,password,role,verificationToken,verificationExpires)
-       VALUES (?,?,?,?,?)`,
-        [name, email, password, role, token, expires]
-    );
-    return { id: result.insertId, name, email, role, verificationToken: token };
-};
+exports.updateUser = (id, data) => UserRepository.update(id, data);
 
-exports.updateUser = async (id, user) => {
-    const { name, email, role } = user;
-    const [result] = await db.query('UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?', [name, email, role, id]);
-    return result.affectedRows;
-};
+exports.deleteUser = (id) => UserRepository.delete(id);
 
-exports.deleteUser = async (id) => {
-    const [result] = await db.query('DELETE FROM users WHERE id = ?', [id]);
-    return result.affectedRows;
-};
+exports.verifyUser = (token) => TokenRepository.verifyUser(token);
 
-exports.verifyUser = async (token) => {
-    const [rows] = await db.query(
-        `SELECT * FROM users WHERE verificationToken = ? AND verificationExpires > NOW()`,
-        [token]
-    );
-    if (!rows.length) return null;
-    await db.query(
-        `UPDATE users SET isVerified = 1, verificationToken = NULL, verificationExpires = NULL 
-       WHERE id = ?`,
-        [rows[0].id]
-    );
-    return rows[0];
-};
+exports.saveRefreshToken = (userId, token, expires) =>
+    TokenRepository.saveRefreshToken(userId, token, expires);
 
-exports.saveRefreshToken = async (userId, token, expires) => {
-    await db.query(
-        `UPDATE users SET refreshToken = ?, refreshTokenExpires = ? WHERE id = ?`,
-        [token, expires, userId]
-    );
-};
+exports.getUserByRefreshToken = (token) => TokenRepository.getUserByRefreshToken(token);
 
-exports.getUserByRefreshToken = async (token) => {
-    const [rows] = await db.query(
-        `SELECT * FROM users WHERE refreshToken = ? AND refreshTokenExpires > NOW()`,
-        [token]
-    );
-    return rows[0];
-};
-
-exports.clearRefreshToken = async (userId) => {
-    await db.query(
-        `UPDATE users SET refreshToken = NULL, refreshTokenExpires = NULL WHERE id = ?`,
-        [userId]
-    );
-};
+exports.clearRefreshToken = (userId) => TokenRepository.clearRefreshToken(userId);
