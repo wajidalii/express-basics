@@ -44,7 +44,20 @@ exports.getAllUsers = async (options) => {
 
 exports.getUserById = (id) => UserRepository.findById(id);
 
-exports.createUser = (data) => UserRepository.create(data);
+exports.createUser = (data) => {
+    const { name, email, password, role } = data;
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    return UserRepository.create({
+        name,
+        email,
+        password,
+        role,
+        verificationToken: token,
+        verificationExpires: expires
+    });
+};
 
 exports.updateUser = (id, data) => UserRepository.update(id, data);
 
