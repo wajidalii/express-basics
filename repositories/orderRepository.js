@@ -1,7 +1,18 @@
 class OrderRepository {
-    async findById(connection, id) {
+    async findOrderById(connection, id) {
         const [rows] = await connection.query('SELECT * FROM orders WHERE id = ?', [id]);
         return rows[0];
+    }
+
+    async findOrderItemsByOrderId(connection, orderId) {
+        const [rows] = await connection.query(`
+            SELECT * FROM order_items WHERE orderId = ?`, [orderId]);
+        return rows;
+    }
+
+    async findOrdersByUserId(connection, userId) {
+        const [rows] = await connection.query('SELECT * FROM orders WHERE userId = ?', [userId]);
+        return rows;
     }
 
     async createOrder(connection, userId) {
@@ -39,8 +50,13 @@ class OrderRepository {
         return result.affectedRows;
     }
 
-    async delete(connection, id) {
+    async deleteOrder(connection, id) {
         const [result] = await connection.query('DELETE FROM orders WHERE id = ?', [id]);
+        return result.affectedRows;
+    }
+
+    async deleteItemByOrderId(connection, orderId) {
+        const [result] = await connection.query('DELETE FROM order_items WHERE orderId = ?', [orderId]);
         return result.affectedRows;
     }
 }
