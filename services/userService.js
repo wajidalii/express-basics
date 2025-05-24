@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');
 const crypto = require('crypto');
-const UserRepository = require('../repositories/userRepository');
-const TokenRepository = require('../repositories/tokenRepository');
-const { signAccessToken, signRefreshToken } = require('../utils/auth');
+const userRepository = require('../repositories/userRepository');
 
 exports.getAllUsers = async (options) => {
     const { sort, order, filter } = options;
@@ -23,7 +21,7 @@ exports.getAllUsers = async (options) => {
         params.push(`%${filter.email}%`);
     }
 
-    const total = await UserRepository.count(where, params);
+    const total = await userRepository.count(where, params);
     if (total === 0) {
         return { data: [], meta: { total, page, limit, totalPages: 0 } };
     }
@@ -33,7 +31,7 @@ exports.getAllUsers = async (options) => {
         throw new Error('Page number exceeds total pages');
     }
 
-    const rows = await UserRepository.findPaginated(
+    const rows = await userRepository.findPaginated(
         where, params, sort, order, limit, offset
     );
 
@@ -43,14 +41,14 @@ exports.getAllUsers = async (options) => {
     };
 };
 
-exports.getUserById = (id) => UserRepository.findById(id);
+exports.getUserById = (id) => userRepository.findById(id);
 
 exports.createUser = (data) => {
     const { name, email, password, role } = data;
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    return UserRepository.create({
+    return userRepository.create({
         name,
         email,
         password,
@@ -60,6 +58,6 @@ exports.createUser = (data) => {
     });
 };
 
-exports.updateUser = (id, data) => UserRepository.update(id, data);
+exports.updateUser = (id, data) => userRepository.update(id, data);
 
-exports.deleteUser = (id) => UserRepository.delete(id);
+exports.deleteUser = (id) => userRepository.delete(id);
