@@ -20,11 +20,11 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const compression = require('compression');
 
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(rateLimiter);
-app.use(compression());
 // app.use(logger);
 // app.use(headerLogger);
 app.use(helmet());
