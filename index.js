@@ -49,7 +49,4 @@ app.use(notFound);
 
 app.use(errorHandler);
 
-const PORT = config.port;
-app.listen(PORT, () => {
-    console.log(`Server is running in ${config.env} mode on port ${PORT}`);
-});
+module.exports = app;
