@@ -7,10 +7,12 @@ const validate = require('../middlewares/validation');
 const { createUserRules, updateUserRules, userIdParamRules } = require('../validations/userValidation');
 const upload = require('../middlewares/upload');
 const { getUsersQueryRules } = require('../validations/userQueryValidation');
+const apicache = require('apicache');
+const cache = apicache.middleware;
 
-router.get('/', getUsersQueryRules, validate, userController.getAllUsers);
+router.get('/', getUsersQueryRules, validate, cache('5 minutes'), userController.getAllUsers);
 
-router.get('/:id', userIdParamRules, validate, userController.getUserById);
+router.get('/:id', userIdParamRules, validate, cache('5 minutes'), userController.getUserById);
 
 router.post('/', createUserRules, validate, userController.createUser);
 
