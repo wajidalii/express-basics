@@ -19,12 +19,12 @@ class UserRepository {
     }
 
     async findById(id) {
-        const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+        const [rows] = await db.query('SELECT id, name FROM users WHERE id = ?', [id]);
         return rows[0];
     }
 
     async findByEmail(email) {
-        const [rows] = await db.query(`SELECT * FROM users WHERE email = ?`, [email]);
+        const [rows] = await db.query(`SELECT id, name, email, role FROM users WHERE email = ?`, [email]);
         return rows[0];
     }
 
