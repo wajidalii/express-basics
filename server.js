@@ -34,8 +34,6 @@ const io = require('socket.io')(server, {
     }
 });
 
-module.exports = io;
-
 sockets(io);
 
 server.listen(config.port, () =>
