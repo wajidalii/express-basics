@@ -6,5 +6,6 @@ module.exports = {
         user: process.env.DB_USER,
         pass: process.env.DB_PASS
     },
-    jwtSecret: process.env.JWT_SECRET
+    jwtSecret: process.env.JWT_SECRET,
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 };  
